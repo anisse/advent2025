@@ -1,0 +1,12 @@
+[package]
+name = "advent2025"
+version = "0.1.0"
+authors = ["Anisse Astier <anisse@astier.eu>"]
+edition = "2024"
+
+[dependencies]
+#regex = "1.12"
+#itertools = "0.14
+
+[features]
+ci_no_input = []
