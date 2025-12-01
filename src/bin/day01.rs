@@ -43,12 +43,11 @@ where
             if sum == 0 || (point != 0 && (sum.signum() != point.signum())) {
                 pass += 1
             }
-            while sum.abs() >= 100 {
-                sum += sum.signum() * -100;
-                //println!("adjusted to {sum}");
-                pass += 1
+            if sum.abs() >= 100 {
+                pass += sum.unsigned_abs() as usize / 100;
+                //println!("Big sum: {sum}, pass is now {pass}");
+                sum %= 100;
             }
-
             //println!("got {sum}, {pass}");
             (sum, pass)
         })
