@@ -33,15 +33,31 @@ where
         sum
     })
 }
+fn is_invalid2(x: &str) -> bool {
+    for n in 2..=x.len() {
+        if x.len().is_multiple_of(n) {
+            let len = x.len() / n;
+            if (1..n).all(|i| x[0..len] == x[i * len..(i + 1) * len]) {
+                return true;
+            }
+        }
+    }
+    false
+}
 
-fn part2<I>(things: I) -> usize
+fn part2<I>(things: I) -> u64
 where
     I: Iterator<Item = ParsedItem>,
 {
-    for _ in things {
-        todo!()
-    }
-    42
+    things.fold(0, |mut sum, el| {
+        for i in el.0..=el.1 {
+            if is_invalid2(&format!("{i}")) {
+                //println!("{i} is invalid");
+                sum += i;
+            }
+        }
+        sum
+    })
 }
 
 #[test]
@@ -51,6 +67,6 @@ fn test() {
     let res = part1(things.clone());
     assert_eq!(res, 1227775554);
     //part 2
-    //let res = part2(things);
-    //assert_eq!(res, 42);
+    let res = part2(things);
+    assert_eq!(res, 4174379265);
 }
