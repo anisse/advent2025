@@ -10,11 +10,9 @@ fn main() {
 }
 type ParsedItem = i32;
 fn parse(input: &str) -> impl Iterator<Item = ParsedItem> + Clone + '_ {
-    input.lines().map(|x| {
-        let mut s = x.chars();
-        let c = s.next().expect("char");
-        let mul = if c == 'L' { -1 } else { 1 };
-        mul * s.collect::<String>().parse::<i32>().expect("not int")
+    input.lines().map(|l| {
+        let mul = if &l[0..1] == "L" { -1 } else { 1 };
+        mul * l[1..].parse::<i32>().expect("not int")
     })
 }
 fn part1<I>(things: I) -> i32
