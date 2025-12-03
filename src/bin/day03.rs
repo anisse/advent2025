@@ -25,7 +25,7 @@ where
                     .max()
                     .unwrap() as usize
         })
-        .inspect(|x| println!("{x}"))
+        //.inspect(|x| println!("{x}"))
         .sum()
 }
 
@@ -33,10 +33,26 @@ fn part2<I>(things: I) -> usize
 where
     I: Iterator<Item = ParsedItem>,
 {
-    for _ in things {
-        todo!()
-    }
-    42
+    things
+        .map(|l| {
+            (0..12)
+                .scan(0, |pos, i| {
+                    let start = *pos;
+                    let end = l.len() - (11 - i);
+                    //println!("{start} -> {end}");
+                    let max = l[start..end]
+                        .iter()
+                        .enumerate()
+                        .reduce(|acc, x| if acc.1 >= x.1 { acc } else { x })
+                        .unwrap();
+                    //println!("{max:?}");
+                    *pos = *pos + max.0 + 1;
+                    Some(*max.1 as usize * 10_usize.pow(11 - i as u32))
+                })
+                .sum::<usize>()
+        })
+        //.inspect(|x| println!("{x}"))
+        .sum()
 }
 
 #[test]
@@ -47,5 +63,5 @@ fn test() {
     assert_eq!(res, 357);
     //part 2
     let res = part2(things);
-    assert_eq!(res, 42);
+    assert_eq!(res, 3121910778619);
 }
