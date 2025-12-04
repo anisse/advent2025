@@ -152,6 +152,20 @@ impl Coord {
     pub fn valid_for<T>(&self, map: &[Vec<T>]) -> bool {
         self.0 >= 0 && self.0 < map[0].len() as i32 && self.1 >= 0 && self.1 < map.len() as i32
     }
+    pub fn neighbors<T>(&self, map: &[Vec<T>]) -> impl Iterator<Item = Coord> {
+        [North, South, East, West]
+            .into_iter()
+            .map(|dir| *self + dir)
+            .filter(|c| c.valid_for(map))
+    }
+    pub fn neighbors8<T>(&self, map: &[Vec<T>]) -> impl Iterator<Item = Coord> {
+        [-1, 0, 1]
+            .into_iter()
+            .flat_map(|y| [-1, 0, 1].into_iter().map(move |x| (x, y)))
+            .filter(|c| *c != (0, 0))
+            .map(|c| *self + c)
+            .filter(|c| c.valid_for(map))
+    }
 }
 impl From<(usize, usize)> for Coord {
     fn from(value: (usize, usize)) -> Self {
@@ -169,6 +183,13 @@ impl std::ops::Add<Dir> for Coord {
     fn add(self, rhs: Dir) -> Self::Output {
         let dir: Coord = rhs.into();
         Self(self.0 + dir.0, self.1 + dir.1)
+    }
+}
+impl std::ops::Add<(i32, i32)> for Coord {
+    type Output = Self;
+
+    fn add(self, rhs: (i32, i32)) -> Self::Output {
+        Self(self.0 + rhs.0, self.1 + rhs.1)
     }
 }
 

@@ -9,20 +9,7 @@ fn main() {
     println!("Part 2: {}", res);
 }
 fn part1(map: MapRef) -> usize {
-    iter_items(map)
-        .filter(|(_, c)| *c == b'@')
-        .filter(|(pos, _)| {
-            [-1, 0, 1]
-                .into_iter()
-                .flat_map(|y| [-1, 0, 1].into_iter().map(move |x| Coord::from((x, y))))
-                .filter(|c| *c != Coord::from((0, 0)))
-                .map(|c| Coord::from((pos.x() + c.x(), pos.y() + c.y())))
-                .filter(|c| c.valid_for(map))
-                .filter(|c| map[c.y()][c.x()] == b'@')
-                .count()
-                < 4
-        })
-        .count()
+    accessible(map).count()
 }
 
 fn accessible(map: MapRef) -> impl Iterator<Item = Coord> {
@@ -30,12 +17,7 @@ fn accessible(map: MapRef) -> impl Iterator<Item = Coord> {
         .filter(|(_, c)| *c == b'@')
         .map(|(pos, _)| pos)
         .filter(|pos| {
-            [-1, 0, 1]
-                .into_iter()
-                .flat_map(|y| [-1, 0, 1].into_iter().map(move |x| Coord::from((x, y))))
-                .filter(|c| *c != Coord::from((0, 0)))
-                .map(|c| Coord::from((pos.x() + c.x(), pos.y() + c.y())))
-                .filter(|c| c.valid_for(map))
+            pos.neighbors8(map)
                 .filter(|c| map[c.y()][c.x()] == b'@')
                 .count()
                 < 4
