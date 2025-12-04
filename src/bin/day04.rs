@@ -60,11 +60,11 @@ fn part2(map: MapRef) -> usize {
 
 #[test]
 fn test() {
-    let things = parse(sample!());
+    let map = grid(sample!());
     //part 1
-    let res = part1(things.clone());
-    assert_eq!(res, 42);
+    let res = part1(&map);
+    assert_eq!(res, 13);
     //part 2
-    let res = part2(things);
-    assert_eq!(res, 42);
+    let res = part2(&map);
+    assert_eq!(res, 43);
 }
