@@ -25,11 +25,37 @@ fn part1(map: MapRef) -> usize {
         .count()
 }
 
+fn accessible(map: MapRef) -> impl Iterator<Item = Coord> {
+    iter_items(map)
+        .filter(|(_, c)| *c == b'@')
+        .map(|(pos, _)| pos)
+        .filter(|pos| {
+            [-1, 0, 1]
+                .into_iter()
+                .flat_map(|y| [-1, 0, 1].into_iter().map(move |x| Coord::from((x, y))))
+                .filter(|c| *c != Coord::from((0, 0)))
+                .map(|c| Coord::from((pos.x() + c.x(), pos.y() + c.y())))
+                .filter(|c| c.valid_for(map))
+                .filter(|c| map[c.y()][c.x()] == b'@')
+                .count()
+                < 4
+        })
+}
+
 fn part2(map: MapRef) -> usize {
-    for _ in map {
-        todo!()
+    let mut map = map.to_vec();
+    let mut removed = 0;
+    loop {
+        let removable = accessible(&map).collect::<Vec<_>>();
+        if removable.is_empty() {
+            break;
+        }
+        removable.into_iter().for_each(|pos| {
+            map[pos.y()][pos.x()] = b'.';
+            removed += 1;
+        });
     }
-    42
+    removed
 }
 
 #[test]
