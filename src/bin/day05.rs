@@ -75,11 +75,11 @@ fn merge_on_overlap(r1: &[u64; 2], r2: &[u64; 2]) -> Option<[u64; 2]> {
 
 #[test]
 fn test() {
-    let things = parse(sample!());
+    let (ranges, things) = parse(sample!());
     //part 1
-    let res = part1(things.clone());
-    assert_eq!(res, 42);
+    let res = part1(&ranges, things.clone());
+    assert_eq!(res, 3);
     //part 2
-    let res = part2(things);
-    assert_eq!(res, 42);
+    let res = part2(&ranges, things);
+    assert_eq!(res, 14);
 }
