@@ -5,7 +5,7 @@ fn main() {
     let res = part1(things.clone());
     println!("Part 1: {}", res);
     //part 2
-    let res = part2(things);
+    let res = part2(parse2(input!()));
     println!("Part 2: {}", res);
 }
 type ParsedItem = Vec<String>;
@@ -39,14 +39,43 @@ where
     sum
 }
 
-fn part2<I>(things: I) -> usize
-where
-    I: Iterator<Item = ParsedItem>,
-{
-    for _ in things {
-        todo!()
+fn parse2(input: &str) -> Vec<String> {
+    transpose(&grid(input))
+        .into_iter()
+        .rev()
+        .map(|l| String::from_utf8(l).unwrap())
+        .collect()
+}
+fn transpose(map: MapRef) -> Map {
+    let rows = map.len();
+    let cols = map[0].len();
+    (0..cols)
+        .map(|c| (0..rows).map(|r| map[r][c]).collect())
+        .collect()
+}
+
+fn part2(things: Vec<String>) -> u64 {
+    let mut sum = 0;
+    let mut buf = vec![];
+    for line in things {
+        //println!("{}", line);
+        if line.bytes().all(|c| c == b' ') {
+            //println!("clear");
+            buf.clear();
+            continue;
+        }
+        let el = ints(&line).next().expect("an int");
+        buf.push(el);
+        //println!("'{el}'");
+        if line.ends_with("+") {
+            sum += buf.iter().sum::<u64>();
+        }
+        if line.ends_with("*") {
+            sum += buf.iter().product::<u64>();
+        }
+        //println!("sum: {sum}, {}", buf.len());
     }
-    42
+    sum
 }
 
 #[test]
@@ -54,8 +83,8 @@ fn test() {
     let things = parse(sample!());
     //part 1
     let res = part1(things.clone());
-    assert_eq!(res, 42);
+    assert_eq!(res, 4277556);
     //part 2
-    let res = part2(things);
-    assert_eq!(res, 42);
+    let res = part2(parse2(sample!()));
+    assert_eq!(res, 3263827);
 }
