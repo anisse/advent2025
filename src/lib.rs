@@ -89,6 +89,7 @@ pub type MapRefMut<'a> = &'a mut [Vec<u8>];
 pub fn grid(s: &str) -> Map {
     s.lines().map(|l| l.bytes().collect()).collect()
 }
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Dir {
     North = 0,
@@ -193,7 +194,7 @@ impl std::ops::Add<(i32, i32)> for Coord {
     }
 }
 
-pub fn print_map(map: &[Vec<u8>]) {
+pub fn print_map(map: MapRef) {
     map.iter().for_each(|l| {
         l.iter().for_each(|c| {
             print!("{}", *c as char);
