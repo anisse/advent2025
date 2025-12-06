@@ -46,13 +46,6 @@ fn parse2(input: &str) -> Vec<String> {
         .map(|l| String::from_utf8(l).unwrap())
         .collect()
 }
-fn transpose(map: MapRef) -> Map {
-    let rows = map.len();
-    let cols = map[0].len();
-    (0..cols)
-        .map(|c| (0..rows).map(|r| map[r][c]).collect())
-        .collect()
-}
 
 fn part2(things: Vec<String>) -> u64 {
     let mut sum = 0;

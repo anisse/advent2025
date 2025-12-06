@@ -214,3 +214,11 @@ pub fn find_first(map: MapRef, start: u8) -> Coord {
         .next()
         .unwrap()
 }
+
+pub fn transpose(map: MapRef) -> Map {
+    let rows = map.len();
+    let cols = map[0].len();
+    (0..cols)
+        .map(|c| (0..rows).map(|r| map[r][c]).collect())
+        .collect()
+}
