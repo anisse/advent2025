@@ -47,44 +47,6 @@ fn part2(map: MapRef) -> usize {
     let start = find_first(map, b'S');
     let mut cache = Cache::new();
     beam(&mut cache, start + (0, 1), map)
-    /*
-    let splitters = map
-        .iter()
-        .enumerate()
-        .map(|(y, line)| {
-            line.iter()
-                .enumerate()
-                .filter(|(_, c)| **c == b'^')
-                .map(|(x, _)| Coord::from((x, y)))
-                .collect::<Vec<_>>()
-        })
-        .filter(|line| !line.is_empty())
-        .collect::<Vec<_>>();
-    map[start.y() + 1][start.x()] = b'|';
-
-    splitters
-        .into_iter()
-        .map(|line| {
-            line.into_iter()
-                .map(|pos| {
-                    let up = *pos + (0, -1);
-                    if map[up.y()][up.x()] == b'|' {
-                        let left = *pos + (-1, 0);
-                        let right = *pos + (1, 0);
-                        if left.valid_for(&map) && {
-                        }
-                        add_beam(&mut map, left);
-                        add_beam(&mut map, right);
-                        print_map(&map);
-                        return true;
-                    }
-                    false
-                })
-                .count()
-        })
-        .inspect(|x| println!("{x:?} splitters"))
-        .product()
-        */
 }
 
 fn beam(cache: &mut Cache, mut pos: Coord, map: MapRef) -> usize {
@@ -102,7 +64,7 @@ fn beam(cache: &mut Cache, mut pos: Coord, map: MapRef) -> usize {
     }
     let mut count = 1;
     if pos.valid_for(map) && map[pos.y()][pos.x()] == b'^' {
-        println!("{pos:?}");
+        //println!("{pos:?}");
         let left = pos + (-1, 0);
         let right = pos + (1, 0);
         let count_left = if left.valid_for(map) {
