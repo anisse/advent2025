@@ -50,9 +50,6 @@ fn part2(map: MapRef) -> usize {
 }
 
 fn beam(cache: &mut Cache, mut pos: Coord, map: MapRef) -> usize {
-    if let Some(x) = cache.get(&pos) {
-        return *x;
-    }
     while pos.valid_for(map) {
         if map[pos.y()][pos.x()] != b'.' {
             break;
