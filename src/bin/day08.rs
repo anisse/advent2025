@@ -4,7 +4,7 @@ use advent2025::*;
 fn main() {
     let things = parse(input!());
     //part 1
-    let res = part1(&things);
+    let res = part1(&things, 1000);
     println!("Part 1: {}", res);
     //part 2
     let res = part2(&things);
@@ -25,7 +25,7 @@ fn parse(input: &str) -> Vec<Junction> {
 fn distance(a: &Junction, b: &Junction) -> i64 {
     ((a.0 - b.0).pow(2) + (a.1 - b.1).pow(2) + (a.2 - b.2).pow(2)).isqrt()
 }
-fn part1(things: &[Junction]) -> usize {
+fn part1(things: &[Junction], iterations: usize) -> usize {
     let mut distances: Vec<_> = things
         .iter()
         .take(things.len() - 1)
@@ -39,13 +39,14 @@ fn part1(things: &[Junction]) -> usize {
         })
         .collect();
     distances.sort();
-    //dbg!(&distances[..1000]);
     let mut graph: HashMap<usize, Vec<usize>> = HashMap::new();
-    for k in 0..1000 {
-        let (_, (i, j)) = distances[k];
-        graph.entry(i).or_default().push(j);
-        graph.entry(j).or_default().push(i);
-    }
+    distances
+        .into_iter()
+        .take(iterations)
+        .for_each(|(_, (i, j))| {
+            graph.entry(i).or_default().push(j);
+            graph.entry(j).or_default().push(i);
+        });
     //dbg!(&graph);
     let mut in_circuit: HashSet<usize> = HashSet::new();
     let mut circuits: Vec<Vec<usize>> = vec![];
@@ -91,6 +92,8 @@ fn part2(things: &[Junction]) -> usize {
     for (_, (i, j)) in distances.into_iter() {
         graph.entry(i).or_default().push(j);
         graph.entry(j).or_default().push(i);
+        // TODO: "maintain and update" is_connected state instead of restarting for each
+        // connection
         if is_connected(&graph, things.len()) {
             return (things[i].0 * things[j].0) as usize;
         }
@@ -117,7 +120,7 @@ fn is_connected(graph: &HashMap<usize, Vec<usize>>, len: usize) -> bool {
 fn test() {
     let things = parse(sample!());
     //part 1
-    let res = part1(&things);
+    let res = part1(&things, 10);
     assert_eq!(res, 40);
     //part 2
     let res = part2(&things);
