@@ -26,7 +26,6 @@ fn distance(a: &Junction, b: &Junction) -> i64 {
     ((a.0 - b.0).pow(2) + (a.1 - b.1).pow(2) + (a.2 - b.2).pow(2)).isqrt()
 }
 fn part1(things: &[Junction]) -> usize {
-    let mut graph: HashMap<usize, Vec<usize>> = HashMap::new();
     let mut distances: Vec<_> = things
         .iter()
         .take(things.len() - 1)
@@ -40,13 +39,14 @@ fn part1(things: &[Junction]) -> usize {
         })
         .collect();
     distances.sort();
-    dbg!(&distances[..1000]);
+    //dbg!(&distances[..1000]);
+    let mut graph: HashMap<usize, Vec<usize>> = HashMap::new();
     for k in 0..1000 {
         let (_, (i, j)) = distances[k];
         graph.entry(i).or_default().push(j);
         graph.entry(j).or_default().push(i);
     }
-    dbg!(&graph);
+    //dbg!(&graph);
     let mut in_circuit: HashSet<usize> = HashSet::new();
     let mut circuits: Vec<Vec<usize>> = vec![];
     let mut c = 0;
@@ -66,30 +66,51 @@ fn part1(things: &[Junction]) -> usize {
             queue.extend(graph[&next].iter());
         }
         c += 1;
-        /*
-        let mut next = Some(i);
-        let mut n = 0;
-        while for i in
-        */
-        /*
-        for j in [i].into_iter().chain(conns.iter()) {
-            if let Some(c) = circuit_map.get(j) {
-                circuits[*c].push(*j)
-            }
-        }
-        */
     }
-    dbg!(&circuits);
+    //dbg!(&circuits);
     let mut lens = circuits.iter().map(|c| c.len()).collect::<Vec<_>>();
     lens.sort();
     lens[lens.len() - 1] * lens[lens.len() - 2] * lens[lens.len() - 3]
 }
 
 fn part2(things: &[Junction]) -> usize {
-    for _ in things {
-        todo!()
+    let mut distances: Vec<_> = things
+        .iter()
+        .take(things.len() - 1)
+        .enumerate()
+        .flat_map(|(i, a)| {
+            things
+                .iter()
+                .enumerate()
+                .skip(i + 1)
+                .map(move |(j, b)| (distance(a, b), (i, j)))
+        })
+        .collect();
+    distances.sort();
+    let mut graph: HashMap<usize, Vec<usize>> = HashMap::new();
+    for (_, (i, j)) in distances.into_iter() {
+        graph.entry(i).or_default().push(j);
+        graph.entry(j).or_default().push(i);
+        if is_connected(&graph, things.len()) {
+            return (things[i].0 * things[j].0) as usize;
+        }
     }
-    42
+    unreachable!();
+}
+fn is_connected(graph: &HashMap<usize, Vec<usize>>, len: usize) -> bool {
+    let mut in_circuit: HashSet<usize> = HashSet::new();
+    let (start, conns) = graph.iter().next().expect("one element");
+    in_circuit.insert(*start);
+    let mut queue = conns.to_vec();
+    while let Some(next) = queue.pop() {
+        if in_circuit.contains(&next) {
+            continue;
+        }
+        in_circuit.insert(next);
+        queue.extend(graph[&next].iter());
+    }
+
+    in_circuit.len() == len
 }
 
 #[test]
@@ -97,8 +118,8 @@ fn test() {
     let things = parse(sample!());
     //part 1
     let res = part1(&things);
-    assert_eq!(res, 42);
+    assert_eq!(res, 40);
     //part 2
     let res = part2(&things);
-    assert_eq!(res, 42);
+    assert_eq!(res, 25272);
 }
