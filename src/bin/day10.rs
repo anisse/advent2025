@@ -1,4 +1,12 @@
 use advent2025::*;
+
+use std::ops::AddAssign;
+
+use z3::{
+    Optimize, SatResult,
+    ast::{Ast, Int, IntoAst},
+};
+
 fn main() {
     let things = parse(input!());
     //part 1
@@ -76,10 +84,10 @@ fn part2<I>(things: I) -> usize
 where
     I: Iterator<Item = ParsedItem>,
 {
-    things.map(joltage_min_presses).sum()
+    things.map(joltage_min_presses_z3).sum()
 }
 
-fn joltage_min_presses(m: Machine) -> usize {
+fn joltage_min_presses_bruteforce(m: Machine) -> usize {
     let state = vec![0; m.joltage.len()];
     let mut max = m.joltage.iter().max().unwrap() * 2; /* heuristic */
     min_presses(&m, &state, 0, &mut max);
@@ -128,6 +136,49 @@ fn cmp(state: &[usize], limit: &[usize]) -> CmpLimit {
         }
     }
     ret
+}
+
+fn joltage_min_presses_z3(m: Machine) -> usize {
+    let solver = Optimize::new();
+    let mut consts = vec![];
+    let mut total = Int::from_i64(0);
+    //solver.assert(&total.eq(Int::from_i64(0)));
+    for button in 0..m.buttons.len() {
+        consts.push(Int::new_const(format!("button {button} presses")));
+        total += &consts[button];
+        solver.assert(&consts[button].ge(Int::from_i64(0)));
+    }
+    for (i, joltage) in m.joltage.iter().enumerate() {
+        let result = Int::from_i64(*joltage as i64);
+        //let mut sum = Int::new_const(format!("equation for joltage {i}"));
+        //solver.assert(&sum.eq(Int::from_i64(0)));
+        let mut sum = Int::from_i64(0);
+        for (j, button) in m.buttons.iter().enumerate() {
+            if button.binary_search(&i).is_ok() {
+                println!("Button press {j} will increase joltage {i} by 1, total {joltage}");
+                sum += &consts[j]
+            }
+        }
+        let constraint = &result.eq(&sum);
+        println!("constraint: {constraint:?}");
+        solver.assert(constraint);
+    }
+    solver.minimize(&total);
+    assert_eq!(SatResult::Sat, solver.check(&[]));
+    let model = solver.get_model().unwrap();
+    println!("{model:?}");
+    for b in consts.iter() {
+        println!(
+            "Presses for {b}: {}",
+            model.eval(b, true).unwrap().as_i64().unwrap() as usize
+        );
+    }
+    println!(
+        "{}",
+        model.eval(&total, true).unwrap().as_i64().unwrap() as usize
+    );
+    println!();
+    model.eval(&total, true).unwrap().as_i64().unwrap() as usize
 }
 
 #[test]
