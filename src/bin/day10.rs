@@ -155,17 +155,18 @@ fn joltage_min_presses_z3(m: Machine) -> usize {
         let mut sum = Int::from_i64(0);
         for (j, button) in m.buttons.iter().enumerate() {
             if button.binary_search(&i).is_ok() {
-                println!("Button press {j} will increase joltage {i} by 1, total {joltage}");
+                //println!("Button press {j} will increase joltage {i} by 1, total {joltage}");
                 sum += &consts[j]
             }
         }
         let constraint = &result.eq(&sum);
-        println!("constraint: {constraint:?}");
+        //println!("constraint: {constraint:?}");
         solver.assert(constraint);
     }
     solver.minimize(&total);
     assert_eq!(SatResult::Sat, solver.check(&[]));
     let model = solver.get_model().unwrap();
+    /*
     println!("{model:?}");
     for b in consts.iter() {
         println!(
@@ -178,6 +179,7 @@ fn joltage_min_presses_z3(m: Machine) -> usize {
         model.eval(&total, true).unwrap().as_i64().unwrap() as usize
     );
     println!();
+    */
     model.eval(&total, true).unwrap().as_i64().unwrap() as usize
 }
 
