@@ -1,5 +1,3 @@
-use std::collections::VecDeque;
-
 use advent2025::*;
 fn main() {
     let things = parse(input!());
@@ -44,10 +42,10 @@ fn part1<I>(things: I) -> usize
 where
     I: Iterator<Item = ParsedItem>,
 {
-    things.map(shortest_path).sum()
+    things.map(light_min_presses).sum()
 }
 
-fn shortest_path(m: Machine) -> usize {
+fn light_min_presses(m: Machine) -> usize {
     let mut states: Vec<Vec<bool>> = vec![];
     let mut generation = 0;
     states.push(vec![false; m.target_state.len()]);
@@ -78,10 +76,58 @@ fn part2<I>(things: I) -> usize
 where
     I: Iterator<Item = ParsedItem>,
 {
-    for _ in things {
-        todo!()
+    things.map(joltage_min_presses).sum()
+}
+
+fn joltage_min_presses(m: Machine) -> usize {
+    let state = vec![0; m.joltage.len()];
+    let mut max = m.joltage.iter().max().unwrap() * 2; /* heuristic */
+    min_presses(&m, &state, 0, &mut max);
+    max
+}
+
+fn min_presses(m: &Machine, state: &[usize], mut current: usize, max: &mut usize) -> Option<usize> {
+    current += 1;
+    let mut next_state = state.to_vec();
+    for b in m.buttons.iter() {
+        next_state.copy_from_slice(state);
+        press_joltage(b, &mut next_state);
+        match cmp(&next_state, &m.joltage) {
+            CmpLimit::Under => {
+                if current < *max - 1
+                    && let Some(new_max) = min_presses(m, &next_state, current, max)
+                {
+                    println!("New max: {max}");
+                    *max = new_max;
+                }
+            }
+            CmpLimit::Equal => return Some(current),
+            CmpLimit::Over => {}
+        }
     }
-    42
+    None
+}
+
+fn press_joltage(button: &[usize], joltage: &mut [usize]) {
+    button.iter().for_each(|b| joltage[*b] += 1);
+}
+
+enum CmpLimit {
+    Under,
+    Equal,
+    Over,
+}
+
+fn cmp(state: &[usize], limit: &[usize]) -> CmpLimit {
+    let mut ret = CmpLimit::Equal;
+    for (j, l) in state.iter().zip(limit.iter()) {
+        if j < l {
+            ret = CmpLimit::Under
+        } else if j > l {
+            return CmpLimit::Over;
+        }
+    }
+    ret
 }
 
 #[test]
@@ -91,6 +137,6 @@ fn test() {
     let res = part1(things.clone());
     assert_eq!(res, 7);
     //part 2
-    //let res = part2(things);
-    //assert_eq!(res, 33);
+    let res = part2(things);
+    assert_eq!(res, 33);
 }
