@@ -63,10 +63,39 @@ fn part2<I>(things: I) -> usize
 where
     I: Iterator<Item = ParsedItem>,
 {
-    for _ in things {
-        todo!()
+    let graph: Graph = things.collect();
+    let mut cache = Cache2::new();
+    count_paths_convert(&mut cache, "svr", "out", "dac", false, "fft", false, &graph)
+}
+type Cache2 = HashMap<(String, bool, bool), usize>;
+fn count_paths_convert(
+    cache: &mut Cache2,
+    start: &str,
+    end: &str,
+    m1: &str,
+    m1_seen: bool,
+    m2: &str,
+    m2_seen: bool,
+    graph: &Graph,
+) -> usize {
+    if let Some(x) = cache.get(&(start.to_string(), m1_seen, m2_seen)) {
+        return *x;
     }
-    42
+    let mut count: usize = 0;
+    let next = graph.get(start);
+    for n in next.iter().flat_map(|x| x.iter()) {
+        let m1_new = m1_seen || n == m1;
+        let m2_new = m2_seen || n == m2;
+        //println!("{start}->{n} ({m1_new}, {m2_new})",);
+        count += if n == end {
+            if m1_seen && m2_seen { 1 } else { 0 }
+        } else {
+            count_paths_convert(cache, n, end, m1, m1_new, m2, m2_new, graph)
+        };
+        //println!("{start}: {count}");
+    }
+    cache.insert((start.to_string(), m1_seen, m2_seen), count);
+    count
 }
 
 #[test]
@@ -76,6 +105,20 @@ fn test() {
     let res = part1(things.clone());
     assert_eq!(res, 5);
     //part 2
-    //let res = part2(things);
-    //assert_eq!(res, 42);
+    let res = part2(parse(
+        "svr: aaa bbb
+aaa: fft
+fft: ccc
+bbb: tty
+tty: ccc
+ccc: ddd eee
+ddd: hub
+hub: fff
+eee: dac
+dac: fff
+fff: ggg hhh
+ggg: out
+hhh: out",
+    ));
+    assert_eq!(res, 2);
 }
