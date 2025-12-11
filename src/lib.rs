@@ -154,7 +154,7 @@ impl Coord {
         self.0 >= 0 && self.0 < map[0].len() as i32 && self.1 >= 0 && self.1 < map.len() as i32
     }
     pub fn neighbors<T>(&self, map: &[Vec<T>]) -> impl Iterator<Item = Coord> {
-        [North, South, East, West]
+        DIRS4
             .into_iter()
             .map(|dir| *self + dir)
             .filter(|c| c.valid_for(map))
