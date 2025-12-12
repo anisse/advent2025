@@ -38,30 +38,40 @@ fn part1<I>(presents: &[Map], regions: I) -> usize
 where
     I: Iterator<Item = ParsedItem>,
 {
+    //let presents = prepare_shapes(presents);
     regions.filter(|r| can_fit(r, presents)).count()
 }
 
-fn can_fit(r: &Region, presents: &[Map]) -> bool {
-    for p in presents {
-        let mut rotations = (0..4)
-            .scan(p.to_vec(), |acc, _| {
-                let r = rotate90(acc);
-                *acc = r.to_vec();
-                Some(r)
-            })
-            .collect::<Vec<_>>();
-        rotations.sort();
-        rotations.dedup();
-        println!("present with rotations:");
-        for p in rotations {
-            print_map(&p);
-            println!();
-        }
-    }
-    println!("{r:?}");
-    return true;
+fn prepare_shapes(presents: &[Map]) -> Vec<Vec<Map>> {
+    presents
+        .iter()
+        .map(|p| {
+            let mut rotations = (0..4)
+                .scan(p.to_vec(), |acc, _| {
+                    let r = rotate90(acc);
+                    *acc = r.to_vec();
+                    Some(r)
+                })
+                .collect::<Vec<_>>();
+            rotations.sort();
+            rotations.dedup();
+            rotations
+        })
+        .collect()
 }
 
+fn can_fit(r: &Region, presents: &[Map]) -> bool {
+    let space: usize = r
+        .qty
+        .iter()
+        .enumerate()
+        .map(|(i, q)| used_space(&presents[i]) * q)
+        .sum();
+    space < (r.size[0] * r.size[1])
+}
+fn used_space(p: MapRef) -> usize {
+    iter_items(p).filter(|(_, c)| *c == b'#').count()
+}
 fn rotate90(map: MapRef) -> Map {
     let rows = map.len();
     let cols = map[0].len();
