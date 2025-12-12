@@ -4,9 +4,6 @@ fn main() {
     //part 1
     let res = part1(&presents, regions.clone());
     println!("Part 1: {}", res);
-    //part 2
-    let res = part2(&presents, regions);
-    println!("Part 2: {}", res);
 }
 type ParsedItem = Region;
 #[derive(Debug)]
@@ -24,7 +21,7 @@ fn parse(input: &str) -> (Vec<Map>, impl Iterator<Item = ParsedItem> + Clone + '
     let regions = parts.next().expect("regions").lines().map(|l| {
         let mut reg = l.split(':');
         let size = ints(reg.next().expect("region size"))
-            .inspect(|i| println!("region size {i}"))
+            //.inspect(|i| println!("region size {i}"))
             .collect::<Vec<_>>()
             .try_into()
             .expect("two size elements");
@@ -42,6 +39,19 @@ where
     regions.filter(|r| can_fit(r, presents)).count()
 }
 
+fn can_fit(r: &Region, presents: &[Map]) -> bool {
+    let space: usize = r
+        .qty
+        .iter()
+        .enumerate()
+        .map(|(i, q)| used_space(&presents[i]) * q)
+        .sum();
+    space < (r.size[0] * r.size[1])
+}
+fn used_space(p: MapRef) -> usize {
+    iter_items(p).filter(|(_, c)| *c == b'#').count()
+}
+/*
 fn prepare_shapes(presents: &[Map]) -> Vec<Vec<Map>> {
     presents
         .iter()
@@ -59,19 +69,6 @@ fn prepare_shapes(presents: &[Map]) -> Vec<Vec<Map>> {
         })
         .collect()
 }
-
-fn can_fit(r: &Region, presents: &[Map]) -> bool {
-    let space: usize = r
-        .qty
-        .iter()
-        .enumerate()
-        .map(|(i, q)| used_space(&presents[i]) * q)
-        .sum();
-    space < (r.size[0] * r.size[1])
-}
-fn used_space(p: MapRef) -> usize {
-    iter_items(p).filter(|(_, c)| *c == b'#').count()
-}
 fn rotate90(map: MapRef) -> Map {
     let rows = map.len();
     let cols = map[0].len();
@@ -79,24 +76,14 @@ fn rotate90(map: MapRef) -> Map {
         .map(|c| (0..rows).rev().map(|r| map[r][c]).collect())
         .collect()
 }
+*/
 
-fn part2<I>(presents: &[Map], regions: I) -> usize
-where
-    I: Iterator<Item = ParsedItem>,
-{
-    for _ in regions {
-        todo!()
-    }
-    42
-}
-
+/*
 #[test]
 fn test() {
     let (presents, regions) = parse(sample!());
     //part 1
     let res = part1(&presents, regions.clone());
     assert_eq!(res, 2);
-    //part 2
-    let res = part2(&presents, regions);
-    assert_eq!(res, 42);
 }
+*/
