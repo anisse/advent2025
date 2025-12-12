@@ -42,8 +42,32 @@ where
 }
 
 fn can_fit(r: &Region, presents: &[Map]) -> bool {
+    for p in presents {
+        let mut rotations = (0..4)
+            .scan(p.to_vec(), |acc, _| {
+                let r = rotate90(acc);
+                *acc = r.to_vec();
+                Some(r)
+            })
+            .collect::<Vec<_>>();
+        rotations.sort();
+        rotations.dedup();
+        println!("present with rotations:");
+        for p in rotations {
+            print_map(&p);
+            println!();
+        }
+    }
     println!("{r:?}");
     return true;
+}
+
+fn rotate90(map: MapRef) -> Map {
+    let rows = map.len();
+    let cols = map[0].len();
+    (0..cols)
+        .map(|c| (0..rows).rev().map(|r| map[r][c]).collect())
+        .collect()
 }
 
 fn part2<I>(presents: &[Map], regions: I) -> usize
